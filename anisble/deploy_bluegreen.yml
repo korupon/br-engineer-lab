@@ -1,0 +1,7 @@
+---
+- hosts: all
+  vars_files:
+    - group_vars/all/vault.yml
+  tasks:
+    - name: Deploy app
+      debug: msg="Deploying Banking App..."
