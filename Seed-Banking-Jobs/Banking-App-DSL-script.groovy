@@ -16,7 +16,7 @@ environments.each { env ->
                             url('https://github.com/korupon/br-engineer-lab.git')
                             credentials('github-token')
                         }
-                        branch('main')
+                        branch('Banking-App-CI-CD')
                     }
                 }
                 scriptPath("Seed-Banking-Jobs/Jenkinsfile-Pipeline-${env}")
