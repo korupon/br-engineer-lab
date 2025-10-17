@@ -1,0 +1,21 @@
+pipeline {
+    agent any
+    stages {
+        stage('Build') {
+            steps {
+                echo "Building SIT environment..."
+            }
+        }
+        stage('Test') {
+            steps {
+                echo "Running tests in SIT..."
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo "Deploying to SIT..."
+            }
+        }
+    }
+}
+

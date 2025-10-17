@@ -1,0 +1,21 @@
+pipeline {
+    agent any
+    stages {
+        stage('Build') {
+            steps {
+                echo "Building UAT environment..."
+            }
+        }
+        stage('Test') {
+            steps {
+                echo "Running tests in UAT..."
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo "Deploying to UAT..."
+            }
+        }
+    }
+}
+
