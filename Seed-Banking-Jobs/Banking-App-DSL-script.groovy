@@ -13,7 +13,7 @@ environments.each { env ->
                 scm {
                     git {
                         remote {
-                            url('https://github.com/korupon/Banking-App-CI-CD.git')
+                            url('https://github.com/korupon/br-engineer-lab.git')
                             credentials('github-token')
                         }
                         branch('main')
