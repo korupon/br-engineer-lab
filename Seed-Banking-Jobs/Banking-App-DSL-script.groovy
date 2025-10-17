@@ -14,6 +14,7 @@ environments.each { env ->
                     git {
                         remote {
                             url('https://github.com/korupon/Banking-App-CI-CD.git')
+                            credentials('github-token')
                         }
                         branch('main')
                     }
