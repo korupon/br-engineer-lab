@@ -1,30 +1,26 @@
-folder('Banking-App') {
-    description('Folder for Banking Application Pipelines')
-}
+def envs = ["SIT", "UAT", "PROD"]
 
-def environments = ['SIT', 'UAT', 'PROD']
-
-environments.each { env ->
-    pipelineJob("Banking-App/Pipeline-${env}") {
-        description("Pipeline for ${env} environment of Banking App")
-
+envs.each { envName ->
+    pipelineJob("Banking-App/Pipeline-${envName}") {
+        description("Pipeline for ${envName} environment of Banking App")
+        parameters {
+            stringParam('ENV', envName, 'Target deployment environment (SIT/UAT/PROD)')
+        }
         definition {
             cpsScm {
                 scm {
                     git {
                         remote {
                             url('https://github.com/korupon/br-engineer-lab.git')
-                            credentials('github-token')
                         }
-                        branch('Banking-App-CI-CD')
+                        branch('*/Banking-App-CI-CD')
                     }
                 }
-                scriptPath("Seed-Banking-Jobs/Jenkinsfile-Pipeline-${env}")
+                scriptPath('Jenkinsfile')
             }
         }
-
         triggers {
-            scm('H/5 * * * *')  // Optional: poll every 5 mins
+            scm('H/5 * * * *') // optional: poll SCM every 5 mins
         }
     }
 }
