@@ -1,45 +1,72 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            // Use an official Maven image with JDK 17
+            image 'maven:3.9.6-eclipse-temurin-17'
+            args '-v /root/.m2:/root/.m2'
+        }
+    }
+
     environment {
         APP_NAME = "banking-app"
-        BUILD_DIR = "target"
+        BRANCH = "Banking-App-CI-CD"
+        DEPLOY_ENV = "SIT"
+        GIT_CREDENTIALS = "github-token"
+    }
+
+    options {
+        skipDefaultCheckout(true)
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        timestamps()
     }
 
     stages {
         stage('Checkout') {
             steps {
-                echo "Checking out code from GitHub..."
-                checkout scm
+                echo "📦 Checking out code from GitHub..."
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: "*/${BRANCH}"]],
+                    doGenerateSubmoduleConfigurations: false,
+                    extensions: [[$class: 'CleanBeforeCheckout']],
+                    userRemoteConfigs: [[
+                        url: 'https://github.com/korupon/br-engineer-lab.git',
+                        credentialsId: "${GIT_CREDENTIALS}"
+                    ]]
+                ])
             }
         }
 
         stage('Build') {
             steps {
-                echo "Building ${APP_NAME}..."
+                echo "🏗️ Building ${APP_NAME} for ${DEPLOY_ENV}..."
                 sh 'mvn clean package -DskipTests'
             }
         }
 
         stage('Unit Test') {
             steps {
-                echo "Running unit tests..."
+                echo "🧪 Running unit tests..."
                 sh 'mvn test'
             }
         }
 
         stage('Code Quality') {
             steps {
-                echo "Running SonarQube analysis (simulated)..."
-                // Example: sh 'mvn sonar:sonar -Dsonar.projectKey=${APP_NAME}'
+                echo "🔍 Performing code quality checks..."
+                sh 'mvn verify'
             }
         }
 
         stage('Deploy to SIT') {
             steps {
-                echo "Simulating SIT deployment..."
+                echo "🚀 Deploying ${APP_NAME} to ${DEPLOY_ENV} environment..."
                 sh '''
-                    echo "Deploying ${APP_NAME} artifact to SIT server..."
-                    ls -l ${BUILD_DIR} || true
+                echo "Simulating SIT Deployment..."
+                mkdir -p /tmp/${APP_NAME}/${DEPLOY_ENV}
+                cp target/*.jar /tmp/${APP_NAME}/${DEPLOY_ENV}/
+                echo "✅ Deployed successfully to ${DEPLOY_ENV}."
                 '''
             }
         }
@@ -47,11 +74,14 @@ pipeline {
 
     post {
         success {
-            echo "✅ SIT build completed successfully!"
-            archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+            echo "✅ Build & deployment completed successfully for ${DEPLOY_ENV}."
         }
         failure {
-            echo "❌ Build failed. Check logs."
+            echo "❌ Build failed. Check logs for details."
+        }
+        always {
+            echo "🧹 Cleaning up workspace..."
+            cleanWs()
         }
     }
 }
