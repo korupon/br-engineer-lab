@@ -1,21 +1,57 @@
 pipeline {
     agent any
+    environment {
+        APP_NAME = "banking-app"
+        BUILD_DIR = "target"
+    }
+
     stages {
+        stage('Checkout') {
+            steps {
+                echo "Checking out code from GitHub..."
+                checkout scm
+            }
+        }
+
         stage('Build') {
             steps {
-                echo "Building SIT environment..."
+                echo "Building ${APP_NAME}..."
+                sh 'mvn clean package -DskipTests'
             }
         }
-        stage('Test') {
+
+        stage('Unit Test') {
             steps {
-                echo "Running tests in SIT..."
+                echo "Running unit tests..."
+                sh 'mvn test'
             }
         }
-        stage('Deploy') {
+
+        stage('Code Quality') {
             steps {
-                echo "Deploying to SIT..."
+                echo "Running SonarQube analysis (simulated)..."
+                // Example: sh 'mvn sonar:sonar -Dsonar.projectKey=${APP_NAME}'
+            }
+        }
+
+        stage('Deploy to SIT') {
+            steps {
+                echo "Simulating SIT deployment..."
+                sh '''
+                    echo "Deploying ${APP_NAME} artifact to SIT server..."
+                    ls -l ${BUILD_DIR} || true
+                '''
             }
         }
     }
-}
 
+    post {
+        success {
+            echo "✅ SIT build completed successfully!"
+            archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+        }
+        failure {
+            echo "❌ Build failed. Check logs."
+        }
+    }
+}
